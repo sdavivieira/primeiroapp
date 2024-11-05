@@ -1,70 +1,138 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { Component,  } from "react"
+import { View, StyleSheet, Image, Text, TextInput, Modal, TouchableOpacity,TouchableWithoutFeedback, Keyboard, Button } from "react-native"
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+interface Estabelecimento {
+  inputAlcool: number | null;
+  inputGasolina: number | null;
+  modalVisible : boolean,
+  result : string
 }
 
+class App extends Component<{}, Estabelecimento>{
+
+  constructor(props : any){
+    super(props);
+    this.state = {
+      modalVisible: false,
+      inputAlcool : 0,
+      inputGasolina : 0,
+      result: ''
+    }
+    this.calcular = this.calcular.bind(this)
+  }
+
+  calcular(){
+    this.setState({modalVisible: true});
+    if(this.state.inputAlcool == 0 || this.state.inputAlcool == 0)
+     {
+      alert('Os valores tem que ser validos.') 
+      return;
+    } 
+    var calculaValores = this.state.inputAlcool! / this.state.inputGasolina!;
+    const resultado = calculaValores < 0.7 ? 'Álcool' : 'Gasolina';
+
+    this.setState({result : resultado})
+  }
+  sair(visible : boolean){
+    this.setState({modalVisible: visible})
+  }
+  render(){
+
+    return(
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}> 
+          <Image style={styles.logo}
+          source={require('@/src/logo.png')}
+          />
+          <Text style={styles.Title} >Qual melhor opção?</Text>
+          <Text style={styles.TitleInput} >Álcool (preço por litro):?</Text>
+          <TextInput
+              style={styles.input}
+              placeholder=""
+              keyboardType="numeric"
+              onChangeText={(number) => this.setState({inputAlcool : number ? parseFloat(number) : 0})}
+              value={this.state.inputAlcool?.toString() ?? ""}
+            />
+          <Text style={styles.TitleInput} >Gasolina (preço por litro):?</Text>
+          <TextInput
+              style={styles.input}
+              placeholder=""
+              keyboardType="numeric"
+              onChangeText={(number) => this.setState({inputGasolina : number ? parseFloat(number) : 0})}
+              value={this.state.inputGasolina?.toString() ?? ""}
+            />
+            <TouchableOpacity style={styles.button} onPress={this.calcular}>
+              <Text style={styles.textButton}> Calcular</Text>
+            </TouchableOpacity>
+
+            <Modal animationType="slide" visible={this.state.modalVisible}>
+              <View style={styles.containerModal}>
+                <Image style={styles.logo} source={require('@/src/gas.png')}/>
+                <Text style={{color: 'green', fontSize: 28, marginTop: 10}}>Compensa usar {this.state.result}</Text>
+                <Text style={{color: '#FFF', fontSize: 24, marginTop: 10}}>Com os Preços</Text>
+                <Text style={{color: '#FFF', fontSize: 20,  marginTop: 10}}>Álcool: R$: {this.state.inputAlcool}</Text>
+                <Text style={{color: '#FFF', fontSize: 20,  marginTop: 10,  marginBottom: 10}}>Gasolina: R$: {this.state.inputGasolina}</Text>
+                <Button title="calcular novamente" onPress={() => this.sair(false)}/>
+              </View>
+            </Modal>
+        </View>
+      </TouchableWithoutFeedback>
+    )
+  
+  }
+}
+
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container:{
+    flex: 1,
+    backgroundColor: '#222',
+    alignItems: 'center'
+  },
+  logo:{
+    marginTop: 50,
+    marginBottom: 10
+  },
+  Title:{
+    color: '#FFF',
+    fontSize: 30
+  },
+  TitleInput: {
+    marginTop: 40,
+    color: '#FFF',
+    fontSize: 25,
+    marginBottom: 10
+  },
+  input : {
+    backgroundColor: '#FFF',
+    width: 300,
+    height: 30,
+    borderRadius: 2
+  },
+  button :{
+    backgroundColor: 'red',
+    color: '#FFF',
+    marginTop : 20,
+    fontSize: 150,
+    width: 250,
+    height: 50,
+    borderRadius: 2,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center'
+
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  textButton:{
+    color: '#FFF',
+    fontSize: 30,
+    justifyContent: 'center'
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+
+
+
+  containerModal : {
+    flex : 1,
+    backgroundColor: '#222',
+    alignItems: 'center'
+  }
+})
+export default App;
